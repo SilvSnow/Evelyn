@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import cover from '../assets/cover.jpeg';
 
 // Eagerly import every photo so Astro can optimize them at build time.
 const modules = import.meta.glob<{ default: ImageMetadata }>(
@@ -14,9 +15,19 @@ const photos = Object.entries(modules)
 ---
 
 <BaseLayout title="Evelyn · Handmade Pottery">
-  <section class="hero container">
-    <h1>Handmade Pottery</h1>
-    <p>Wheel-thrown and hand-built pieces, glazed and fired one at a time.</p>
+  <section class="hero-banner">
+    <Image
+      class="hero-banner__img"
+      src={cover}
+      alt="Evelyn glazing a vase in her studio"
+      widths={[720, 1080, 1600]}
+      sizes="100vw"
+      loading="eager"
+    />
+    <div class="hero-banner__overlay">
+      <h1>Handmade Pottery</h1>
+      <p>Wheel-thrown and hand-built pieces, glazed and fired one at a time.</p>
+    </div>
   </section>
 
   <div class="container">
