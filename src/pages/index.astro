@@ -1,0 +1,37 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Eagerly import every photo so Astro can optimize them at build time.
+const modules = import.meta.glob<{ default: ImageMetadata }>(
+  '../assets/pottery/*.{jpeg,jpg,JPG,JPEG,png,PNG}',
+  { eager: true }
+);
+
+const photos = Object.entries(modules)
+  .map(([path, mod]) => ({ path, img: mod.default }))
+  .sort((a, b) => a.path.localeCompare(b.path));
+---
+
+<BaseLayout title="Evelyn · Handmade Pottery">
+  <section class="hero container">
+    <h1>Handmade Pottery</h1>
+    <p>Wheel-thrown and hand-built pieces, glazed and fired one at a time.</p>
+  </section>
+
+  <div class="container">
+    <div class="gallery">
+      {photos.map(({ img }, i) => (
+        <figure>
+          <Image
+            src={img}
+            alt={`Pottery piece ${i + 1}`}
+            widths={[320, 640, 960]}
+            sizes="(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 340px"
+            loading={i < 6 ? 'eager' : 'lazy'}
+          />
+        </figure>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

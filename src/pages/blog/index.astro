@@ -1,0 +1,32 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<BaseLayout title="Journal · Evelyn Pottery" description="Notes from the studio.">
+  <section class="page container">
+    <h1>Journal</h1>
+    <p class="lead">Notes from the studio — what I'm making, glazing, and firing.</p>
+
+    {posts.length === 0 ? (
+      <p>No posts yet. Check back soon!</p>
+    ) : (
+      <ul class="post-list">
+        {posts.map((post) => (
+          <li>
+            <h2><a href={`/blog/${post.id}/`}>{post.data.title}</a></h2>
+            <div class="post-meta">{fmt(post.data.date)}</div>
+            {post.data.description && <p class="post-excerpt">{post.data.description}</p>}
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+</BaseLayout>
