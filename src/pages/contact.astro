@@ -1,50 +1,99 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-// ── Configure these two lines ───────────────────────────────────────────────
-// 1. Your email address (used for the "Email me" button and form fallback).
+// ── Configure these ──────────────────────────────────────────────────────────
+// Your email address (used for the fallback "Email me" button).
 const contactEmail = 'hello@example.com';
-// 2. To enable the contact form, create a free form endpoint (e.g. Formspree
-//    at https://formspree.io or Web3Forms at https://web3forms.com) and paste
-//    the URL below. While this is an empty string, the form is hidden and only
-//    the email button shows.
-const formEndpoint = '';
-// ────────────────────────────────────────────────────────────────────────────
+
+// To turn the ticket form on, get a free access key from https://web3forms.com
+// (enter your email, they email you a key), then paste it below. Every ticket
+// gets emailed to that address, with the sender's email as the reply-to.
+// While this is empty, the form is hidden and only the email button shows.
+const web3formsKey = '';
+// ─────────────────────────────────────────────────────────────────────────────
 ---
 
 <BaseLayout
   title="Contact · Evelyn Pottery"
-  description="Get in touch with Evelyn about her pottery."
+  description="Send Evelyn a message about her pottery."
 >
   <section class="page container">
     <h1>Contact</h1>
-    <p class="lead">Questions about a piece, a commission, or the shop? I'd love to hear from you.</p>
+    <p class="lead">Questions about a piece, a commission, or the shop? Send me a note and I'll get back to you.</p>
 
     <div class="prose">
-      <p>
-        The quickest way to reach me is email:
-      </p>
-      <p>
-        <a class="btn" href={`mailto:${contactEmail}`}>Email me →</a>
-      </p>
+      {web3formsKey ? (
+        <>
+          <form id="ticket-form" class="contact-form">
+            <input type="hidden" name="access_key" value={web3formsKey} />
+            <input type="hidden" name="subject" value="New ticket from Evelyn Pottery" />
+            <!-- honeypot: bots fill this, humans don't -->
+            <input type="checkbox" name="botcheck" class="hidden" tabindex="-1" autocomplete="off" />
 
-      {formEndpoint && (
-        <form class="contact-form" action={formEndpoint} method="POST">
-          <label>
-            Name
-            <input type="text" name="name" required />
-          </label>
-          <label>
-            Email
-            <input type="email" name="email" required />
-          </label>
-          <label>
-            Message
-            <textarea name="message" rows="5" required></textarea>
-          </label>
-          <button type="submit" class="btn">Send message</button>
-        </form>
+            <label>
+              Your name
+              <input type="text" name="name" required />
+            </label>
+            <label>
+              Your email
+              <input type="email" name="email" required />
+            </label>
+            <label>
+              Subject
+              <input type="text" name="topic" placeholder="e.g. Commission enquiry" required />
+            </label>
+            <label>
+              Message
+              <textarea name="message" rows="6" required></textarea>
+            </label>
+            <button type="submit" class="btn">Send message</button>
+            <p id="ticket-status" class="ticket-status" role="status" aria-live="polite"></p>
+          </form>
+        </>
+      ) : (
+        <p>
+          The quickest way to reach me is email:
+          <br />
+          <a class="btn" href={`mailto:${contactEmail}`}>Email me →</a>
+        </p>
       )}
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  const form = document.getElementById('ticket-form') as HTMLFormElement | null;
+  const status = document.getElementById('ticket-status');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const button = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    if (status) { status.textContent = 'Sending…'; status.className = 'ticket-status'; }
+    button.disabled = true;
+
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: new FormData(form),
+      });
+      const data = await res.json();
+      if (data.success) {
+        form.reset();
+        if (status) {
+          status.textContent = "Thanks! Your message has been sent — I'll reply to the email you gave.";
+          status.className = 'ticket-status is-success';
+        }
+      } else {
+        throw new Error(data.message || 'Something went wrong.');
+      }
+    } catch (err) {
+      if (status) {
+        status.textContent = "Sorry — that didn't send. Please try again or email me directly.";
+        status.className = 'ticket-status is-error';
+      }
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>

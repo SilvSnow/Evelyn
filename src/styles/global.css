@@ -203,6 +203,11 @@ h1, h2, h3 { font-family: var(--font-serif); font-weight: 600; line-height: 1.2;
   border-color: var(--accent);
 }
 .contact-form .btn { align-self: flex-start; }
+.contact-form .btn:disabled { opacity: 0.6; cursor: default; transform: none; }
+.hidden { display: none !important; }
+.ticket-status { margin: 0; font-weight: 600; min-height: 1.2em; }
+.ticket-status.is-success { color: #2f7d4f; }
+.ticket-status.is-error { color: #b3402f; }
 
 /* ---------- Blog list ---------- */
 .post-list { list-style: none; padding: 0; margin: 0; }
