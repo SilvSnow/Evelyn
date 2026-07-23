@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// ── Configure these two lines ───────────────────────────────────────────────
+// 1. Your email address (used for the "Email me" button and form fallback).
+const contactEmail = 'hello@example.com';
+// 2. To enable the contact form, create a free form endpoint (e.g. Formspree
+//    at https://formspree.io or Web3Forms at https://web3forms.com) and paste
+//    the URL below. While this is an empty string, the form is hidden and only
+//    the email button shows.
+const formEndpoint = '';
+// ────────────────────────────────────────────────────────────────────────────
+---
+
+<BaseLayout
+  title="Contact · Evelyn Pottery"
+  description="Get in touch with Evelyn about her pottery."
+>
+  <section class="page container">
+    <h1>Contact</h1>
+    <p class="lead">Questions about a piece, a commission, or the shop? I'd love to hear from you.</p>
+
+    <div class="prose">
+      <p>
+        The quickest way to reach me is email:
+      </p>
+      <p>
+        <a class="btn" href={`mailto:${contactEmail}`}>Email me →</a>
+      </p>
+
+      {formEndpoint && (
+        <form class="contact-form" action={formEndpoint} method="POST">
+          <label>
+            Name
+            <input type="text" name="name" required />
+          </label>
+          <label>
+            Email
+            <input type="email" name="email" required />
+          </label>
+          <label>
+            Message
+            <textarea name="message" rows="5" required></textarea>
+          </label>
+          <button type="submit" class="btn">Send message</button>
+        </form>
+      )}
+    </div>
+  </section>
+</BaseLayout>
