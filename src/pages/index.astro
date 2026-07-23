@@ -9,8 +9,20 @@ const modules = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true }
 );
 
+// Turn a filename like "17-carving-detail-on-pot.jpg" into alt text:
+// "Carving detail on pot" (drops the order prefix, the -bw suffix, and ext).
+const toAlt = (path: string) => {
+  const base = path.split('/').pop()!.replace(/\.[^.]+$/, '');
+  const words = base
+    .replace(/^\d+-/, '')
+    .replace(/-bw$/, '')
+    .replace(/-/g, ' ')
+    .trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
+
 const photos = Object.entries(modules)
-  .map(([path, mod]) => ({ path, img: mod.default }))
+  .map(([path, mod]) => ({ path, img: mod.default, alt: toAlt(path) }))
   .sort((a, b) => a.path.localeCompare(b.path));
 ---
 
@@ -32,11 +44,11 @@ const photos = Object.entries(modules)
 
   <div class="container">
     <div class="gallery">
-      {photos.map(({ img }, i) => (
+      {photos.map(({ img, alt }, i) => (
         <figure>
           <Image
             src={img}
-            alt={`Pottery piece ${i + 1}`}
+            alt={alt}
             widths={[320, 640, 960]}
             sizes="(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 340px"
             loading={i < 6 ? 'eager' : 'lazy'}
