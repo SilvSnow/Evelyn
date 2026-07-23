@@ -13,3 +13,7 @@ npm-debug.log*
 .DS_Store
 # cloudflare
 .wrangler/
+
+.dev.vars*
+!.dev.vars.example
+!.env.example
